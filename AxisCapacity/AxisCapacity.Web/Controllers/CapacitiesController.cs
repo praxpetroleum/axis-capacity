@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
 using AxisCapacity.Common;
 using AxisCapacity.Data;
 using AxisCapacity.Engine;
@@ -25,21 +27,36 @@ namespace AxisCapacity.Web.Controllers
         {
             try
             {
-                var result = date != null 
-                    ? _repository.GetCapacity(Terminal.From(terminal), Shift.From(shift), DateTime.Parse(date))
-                    : _repository.GetCapacity(Terminal.From(terminal), Shift.From(shift), DateTime.Today);
+                var queryTerminal = Terminal.From(terminal);
+                var queryShift = Shift.From(shift);
+                var queryDate = string.IsNullOrEmpty(date) ? DateTime.Today : DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
 
+                var result = _repository.GetCapacity(queryTerminal, queryShift, queryDate);
                 if (result == null)
                 {
                     return NotFound();
                 }
-                
+
+                var members = result.GroupId != null
+                    ? _repository.GetGroupCapacities(queryTerminal, queryShift, queryDate, result.GroupId)
+                    : Enumerable.Empty<CapacityResult>();
+
+
                 result.Capacity = _engine.CalculateCapacity(new ParameterBuilder()
                     .WithAverageLoad(result.AverageLoad)
                     .WithDeliveriesPerShift(result.DeliveriesPerShift)
                     .WithShifts(result.NumberOfShifts).Build());
+
+                
+                foreach (var member in members)
+                {
+                    result.Capacity += _engine.CalculateCapacity(new ParameterBuilder()
+                        .WithAverageLoad(member.AverageLoad)
+                        .WithDeliveriesPerShift(member.DeliveriesPerShift)
+                        .WithShifts(member.NumberOfShifts).Build());
+                }
             
-                return Ok(result);
+                return Ok(new {capacity = result.Capacity});
             } 
             catch (ArgumentException e)
             {
@@ -49,8 +66,6 @@ namespace AxisCapacity.Web.Controllers
             {
                 return BadRequest("Invalid date");
             }
-            
         }
-
     }
 }

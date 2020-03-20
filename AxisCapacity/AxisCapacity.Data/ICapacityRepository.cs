@@ -6,12 +6,8 @@ namespace AxisCapacity.Data
 {
     public interface ICapacityRepository
     {
-        IEnumerable<CapacityResult> GetCapacities(Terminal terminal, ViewType view);
-        
-        IEnumerable<CapacityResult> GetCapacities(Terminal terminal, Shift shift, ViewType view);
-        
         CapacityResult GetCapacity(Terminal terminal, Shift shift, DateTime date);
 
-        CapacityResult GetCapacity(Terminal terminal, Shift shift);
+        IEnumerable<CapacityResult> GetGroupCapacities(Terminal terminal, Shift shift, DateTime date, int? groupId);
     }
 }

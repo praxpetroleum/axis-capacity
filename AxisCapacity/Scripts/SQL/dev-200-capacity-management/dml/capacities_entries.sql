@@ -1,5 +1,8 @@
-INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grays', 'AM', 68996, 3.24, 14, 14, 14, 14, 14, 9, 8);
-INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grays', 'PM', 68996, 3.22, 6, 6, 6, 6, 6, 6, 4);
+INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Dagenham', 'AM', 34498, 1.62, 7, 7, 7, 7, 7, 5, 5);
+INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Dagenham', 'PM', 34498, 1.61, 3, 3, 3, 3, 3, 2, 3);
+
+INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grays', 'AM', 34498, 1.62, 7, 7, 7, 7, 7, 4, 3);
+INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grays', 'PM', 34498, 1.61, 3, 3, 3, 3, 3, 4, 1);
 
 INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Westerleigh', 'AM', 34096, 2.34, 1, 1, 1, 1, 1, 0, 0);
 INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Westerleigh', 'PM', 34096, 2.32, 1, 1, 1, 1, 1, 0, 0);
