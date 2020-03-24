@@ -18,3 +18,7 @@ INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, we
 
 INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grangemouth', 'AM', 33013, 1.88, 2, 2, 2, 2, 2, 1, 1);
 INSERT INTO dbo.Capacity(terminal, shift, avg_load, avg_deliveries, mon, tue, wed, thu, fri, sat, sun) VALUES ('Grangemouth', 'PM', 33013, 1.95, 3, 3, 3, 3, 3, 0, 1);
+
+
+insert into dbo.TerminalGrouping(terminal, group_id) values ('Dagenham', 1);
+insert into dbo.TerminalGrouping(terminal, group_id) values ('Grays', 1);
