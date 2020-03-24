@@ -14,5 +14,9 @@ create table dbo.Capacity (
     constraint FK_TerminalCapacity_Terminal foreign key(terminal) references dbo.Terminals(name)    
 )
 
-
-
+create table dbo.TerminalGrouping (
+	terminal varchar(100) not null,
+	group_id tinyint not null,
+	constraint PK_TerminalGrouping primary key(terminal),
+	constraint FK_TerminalGrouping_Terminal foreign key(terminal) references dbo.Terminals(name)
+)
