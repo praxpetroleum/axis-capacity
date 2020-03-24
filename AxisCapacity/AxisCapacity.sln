@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxisCapacity.Web", "AxisCapacity.Web\AxisCapacity.Web.csproj", "{1F77EEDF-9AB7-4276-B217-91EE84FDFDDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Web", "AxisCapacity.Web\AxisCapacity.Web.csproj", "{1F77EEDF-9AB7-4276-B217-91EE84FDFDDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxisCapacity.Data", "AxisCapacity.Data\AxisCapacity.Data.csproj", "{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Data", "AxisCapacity.Data\AxisCapacity.Data.csproj", "{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxisCapacity.Common", "AxisCapacity.Common\AxisCapacity.Common.csproj", "{F89C15D5-1FF9-4176-9F37-2559AE214859}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Common", "AxisCapacity.Common\AxisCapacity.Common.csproj", "{F89C15D5-1FF9-4176-9F37-2559AE214859}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxisCapacity.Engine", "AxisCapacity.Engine\AxisCapacity.Engine.csproj", "{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Engine", "AxisCapacity.Engine\AxisCapacity.Engine.csproj", "{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

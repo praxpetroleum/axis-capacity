@@ -14,7 +14,7 @@
       "launchBrowser": false,
       "launchUrl": "api/version",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Evans"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }
