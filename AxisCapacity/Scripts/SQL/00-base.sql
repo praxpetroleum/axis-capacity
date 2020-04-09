@@ -1,3 +1,12 @@
+drop table dbo.Capacity;
+
+go
+
+drop table dbo.TerminalGrouping;
+
+go
+
+
 create table dbo.Capacities (
     terminal varchar(100) not null,
     shift varchar(2) not null check (shift in ('AM', 'PM')),
@@ -11,11 +20,16 @@ create table dbo.Capacities (
 
 go
 
-create table dbo.TerminalGroup (
+create table dbo.TerminalGroups (
 	terminal varchar(100) not null,
 	group_id tinyint not null,
 	constraint PK_TerminalGrouping primary key(terminal)
 )
+
+go
+
+insert into dbo.TerminalGroups(terminal, group_id) values ('Dagenham', 1);
+insert into dbo.TerminalGroups(terminal, group_id) values ('Grays', 1);
 
 go
 
@@ -153,3 +167,4 @@ insert into dbo.Capacities (terminal, shift, day, load, deliveries, shifts, capa
 insert into dbo.Capacities (terminal, shift, day, load, deliveries, shifts, capacity) values ('Grangemouth', 'PM', 'SUN', 33013, 1.95, 1, null);
 
 go
+
