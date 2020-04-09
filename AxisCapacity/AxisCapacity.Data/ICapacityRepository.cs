@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using AxisCapacity.Common;
 
 namespace AxisCapacity.Data
 {
     public interface ICapacityRepository
     {
-        CapacityResult GetCapacity(Terminal terminal, Shift shift, DateTime date);
+        DbCapacity GetCapacity(string terminal, string shift, DateTime date);
+        
+        IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime date, int groupId);
+        
+        IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime? date);
 
-        IEnumerable<CapacityResult> GetGroupCapacities(Terminal terminal, Shift shift, DateTime date, int? groupId);
+        void InsertCapacity(DbCapacity dbCapacity);
     }
 }

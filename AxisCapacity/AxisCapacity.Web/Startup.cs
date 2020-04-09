@@ -1,9 +1,12 @@
+using System.IO;
 using AxisCapacity.Data;
 using AxisCapacity.Engine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace AxisCapacity.Web
@@ -36,6 +39,10 @@ namespace AxisCapacity.Web
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
+
+            app.UseFileServer(new FileServerOptions { FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Static")) });
 
             app.UseRouting();
 
