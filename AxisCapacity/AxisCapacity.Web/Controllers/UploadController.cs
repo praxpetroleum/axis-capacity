@@ -24,35 +24,46 @@ namespace AxisCapacity.Web.Controllers
         [HttpPost]
         public IActionResult Post(IFormFile capacityUpload)
         {
+            if (capacityUpload == null)
+            {
+                return Ok("No action taken");
+            }
+
             if (!IsMultipart(Request))
             {
                 return StatusCode((int) HttpStatusCode.UnsupportedMediaType);
             }
 
-            using (var stream = new StreamReader(capacityUpload.OpenReadStream()))
+            try
             {
-                using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
-                csv.Configuration.HeaderValidated = null;
-                csv.Configuration.MissingFieldFound = null;
-                var values = csv.GetRecords<CsvCapacityValues>();
-                foreach (var value in values)
+                using (var stream = new StreamReader(capacityUpload.OpenReadStream()))
                 {
-                    _repository.InsertCapacity(new DbCapacity
+                    using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+                    var values = csv.GetRecords<CsvCapacityValues>();
+                    foreach (var value in values)
                     {
-                        Terminal = value.Terminal,
-                        Day = value.Day,
-                        Shift =  value.Shift,
-                        Load =  value.AverageLoad,
-                        Deliveries = value.DeliveriesPerShift,
-                        Shifts = value.NumberOfShifts,
-                        Capacity = value.Capacity
-                    });
+                        var capacity = new DbCapacity();
+                        capacity.Terminal = value.Terminal;
+                        capacity.Day = value.Day;
+                        capacity.Shift = value.Shift;
+                        capacity.Load = value.AverageLoad;
+                        capacity.Deliveries = value.DeliveriesPerShift;
+                        capacity.Shifts = value.NumberOfShifts;
+                        capacity.Capacity = value.Capacity;
+                        _repository.InsertCapacity(capacity);
+                    }
                 }
+
+                return Ok("Success");
             }
+            catch (Exception e)
+            {
+                return Ok("An error ocurred: " + e.Message);
+            }
+            
 
-            return Ok("Success");
+            
         }
-
 
         private static bool IsMultipart(HttpRequest request)
         {

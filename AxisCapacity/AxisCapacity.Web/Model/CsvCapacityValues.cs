@@ -14,16 +14,20 @@ namespace AxisCapacity.Web.Model
         public string Day { get; set; }
 
         [Name("avg_load")]
-        public int AverageLoad { get; set; }
+        [OptionalAttribute]
+        public int? AverageLoad { get; set; }
 
         [Name("dels_shift")]
-        public decimal DeliveriesPerShift { get; set; }
+        [OptionalAttribute]
+        public decimal? DeliveriesPerShift { get; set; }
 
         [Name("shifts")]
-        public int NumberOfShifts { get; set; }
+        [OptionalAttribute]
+        public int? NumberOfShifts { get; set; }
 
         [Name("capacity")]
-        public decimal Capacity { get; set; }
+        [OptionalAttribute]
+        public decimal? Capacity { get; set; }
 
         public override string ToString()
         {
