@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Web", "AxisCap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Data", "AxisCapacity.Data\AxisCapacity.Data.csproj", "{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Common", "AxisCapacity.Common\AxisCapacity.Common.csproj", "{F89C15D5-1FF9-4176-9F37-2559AE214859}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AxisCapacity.Engine", "AxisCapacity.Engine\AxisCapacity.Engine.csproj", "{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DE8A6F6-A2B3-44C1-BB1A-E7CCADC917E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F89C15D5-1FF9-4176-9F37-2559AE214859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F89C15D5-1FF9-4176-9F37-2559AE214859}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F89C15D5-1FF9-4176-9F37-2559AE214859}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F89C15D5-1FF9-4176-9F37-2559AE214859}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FF4428A-8CAC-4B8F-AFDC-1A073946F58D}.Release|Any CPU.ActiveCfg = Release|Any CPU

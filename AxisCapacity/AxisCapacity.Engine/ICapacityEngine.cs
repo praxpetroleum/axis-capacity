@@ -2,6 +2,6 @@
 {
     public interface ICapacityEngine
     {
-        decimal CalculateCapacity(Parameters parameters);
+        decimal? CalculateCapacity(int? load, decimal? deliveries, int? shifts);
     }
 }

@@ -2,9 +2,13 @@
 {
     public class CapacityEngine : ICapacityEngine
     {
-        public decimal CalculateCapacity(Parameters parameters)
+        public decimal? CalculateCapacity(int? load, decimal? deliveries, int? shifts)
         {
-            return parameters.AverageLoad * parameters.DeliveryPerShift * parameters.NumberOfShifts;
+            if (load.HasValue && deliveries.HasValue && shifts.HasValue)
+            {
+                return load.Value * deliveries.Value * shifts.Value;
+            }
+            return null;
         }
     }
 }
