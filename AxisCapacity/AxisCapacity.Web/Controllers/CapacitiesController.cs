@@ -69,35 +69,9 @@ namespace AxisCapacity.Web.Controllers
                 return Ok(new {capacity = total});
             }
 
-            return Ok(_repository.GetCapacities(terminal, shift, queryDate));
+            var capacities = _repository.GetCapacities(terminal, shift, queryDate);
 
-
-            // var result = _repository.GetCapacities(queryTerminal, queryShift, queryDate);
-            // if (result == null)
-            // {
-            //     return NotFound();
-            // }
-            //
-            // var members = result.GroupId != null
-            //     ? _repository.GetGroupCapacities(queryTerminal, queryShift, queryDate, result.GroupId)
-            //     : Enumerable.Empty<DbCapacity>();
-            //
-            //
-            // result.Capacity = _engine.CalculateCapacity(new ParameterBuilder()
-            //     .WithAverageLoad(result.AverageLoad)
-            //     .WithDeliveriesPerShift(result.DeliveriesPerShift)
-            //     .WithShifts(result.NumberOfShifts).Build());
-            //
-            //
-            // foreach (var member in members)
-            // {
-            //     result.Capacity += _engine.CalculateCapacity(new ParameterBuilder()
-            //         .WithAverageLoad(member.AverageLoad)
-            //         .WithDeliveriesPerShift(member.DeliveriesPerShift)
-            //         .WithShifts(member.NumberOfShifts).Build());
-            // }
-            //
-            // return Ok(new {capacity = result.Capacity});
+            return Ok(capacities);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text.Json.Serialization;
 
 namespace AxisCapacity.Data
 {
@@ -11,6 +11,8 @@ namespace AxisCapacity.Data
         public decimal? Deliveries { get; set; }
         public int? Shifts { get; set; }
         public decimal? Capacity { get; set; }
+        
+        [JsonIgnoreAttribute]
         public int? GroupId { get; set; }
 
         public override string ToString()

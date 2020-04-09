@@ -8,7 +8,7 @@ namespace AxisCapacity.Data
     {
         private const string CapacityTable = "dbo.Capacities";
 
-        private const string GroupingTable = "dbo.TerminalGroup";
+        private const string GroupingTable = "dbo.TerminalGroups";
 
         private readonly string _dbConnectionString;
 
@@ -33,15 +33,16 @@ namespace AxisCapacity.Data
             using var reader = cmd.ExecuteReader();
             if (reader.Read())
             {
-                return new DbCapacity
+                var capacity = new DbCapacity
                 {
-                    Terminal = (string)reader[0], 
-                    Load = reader[1] == DBNull.Value ? null : (int?) reader[1], 
-                    Deliveries = reader[2] == DBNull.Value ? null : (decimal?) reader[2], 
-                    Shifts = reader[3] == DBNull.Value ? null : (int?) reader[3], 
-                    Capacity = reader[4] == DBNull.Value ? null : (decimal?) reader[3], 
-                    GroupId = reader[4] == DBNull.Value ? null : (byte?) reader[4]
+                    Terminal = (string) reader[0],
+                    Load = reader[1] == DBNull.Value ? null : (int?) reader[1],
+                    Deliveries = reader[2] == DBNull.Value ? null : (decimal?) reader[2],
+                    Shifts = reader[3] == DBNull.Value ? null : (byte?) reader[3],
+                    Capacity = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
+                    GroupId = reader[5] == DBNull.Value ? null : (byte?) reader[5]
                 };
+                return capacity;
             }
 
             return null;
@@ -69,7 +70,7 @@ namespace AxisCapacity.Data
                     Terminal = (string)reader[0], 
                     Load = reader[1] == DBNull.Value ? null : (int?) reader[1], 
                     Deliveries = reader[2] == DBNull.Value ? null : (decimal?) reader[2], 
-                    Shifts = reader[3] == DBNull.Value ? null : (int?) reader[3], 
+                    Shifts = reader[3] == DBNull.Value ? null : (byte?) reader[3], 
                     Capacity = reader[4] == DBNull.Value ? null : (decimal?) reader[3], 
                     GroupId = reader[4] == DBNull.Value ? null : (byte?) reader[4]
                 };
@@ -78,7 +79,7 @@ namespace AxisCapacity.Data
 
         public IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime? date)
         {
-            var sql = $"select terminal, load, deliveries, shifts, capacity from {CapacityTable} where 1=1";
+            var sql = $"select terminal, day, shift, load, deliveries, shifts, capacity from {CapacityTable} where 1=1";
 
             if (!string.IsNullOrEmpty(terminal))
             {
@@ -104,11 +105,13 @@ namespace AxisCapacity.Data
             {
                 yield return new DbCapacity
                 {
-                    Terminal = (string)reader[0], 
-                    Load = reader[1] == DBNull.Value ? null : (int?) reader[1], 
-                    Deliveries = reader[2] == DBNull.Value ? null : (decimal?) reader[2], 
-                    Shifts = reader[3] == DBNull.Value ? null : (int?) reader[3], 
-                    Capacity = reader[4] == DBNull.Value ? null : (decimal?) reader[3], 
+                    Terminal = (string) reader[0],
+                    Day = (string) reader[1],
+                    Shift = (string) reader[2],
+                    Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
+                    Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
+                    Shifts = reader[5] == DBNull.Value ? null : (byte?) reader[5],
+                    Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
                 };
             }
         }
