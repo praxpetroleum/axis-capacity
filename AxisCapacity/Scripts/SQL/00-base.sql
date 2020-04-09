@@ -14,7 +14,7 @@ create table dbo.Capacities (
     load integer,
     deliveries decimal(4, 2),
     shifts tinyint,
-    capacity integer,
+    capacity decimal(10, 2),
     constraint PK_TerminalCapacity primary key(terminal, shift, day)
 )
 
