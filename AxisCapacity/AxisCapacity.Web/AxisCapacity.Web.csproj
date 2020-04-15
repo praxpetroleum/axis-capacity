@@ -25,6 +25,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Static\upload.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="if $(ConfigurationName) == Release copy /Y $(ProjectDir)\appsettings.$(AxisWebEnvironment).json $(ProjectDir)\appsettings.json" />
   </Target>

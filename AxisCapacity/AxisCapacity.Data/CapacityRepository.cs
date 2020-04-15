@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Microsoft.Data.SqlClient;
 
 namespace AxisCapacity.Data
@@ -118,24 +121,97 @@ namespace AxisCapacity.Data
 
         public void InsertCapacity(DbCapacity dbCapacity)
         {
+            var keyFields = new List<string> {"terminal", "day", "shift"};
+            var nonKeyFields = new List<string> { "load", "deliveries", "shifts", "capacity" };
+            IgnoreIfNull(nonKeyFields, dbCapacity);
+            keyFields.AddRange(nonKeyFields);
+
+
             var sql = $"merge into {CapacityTable} as target " + 
-                      "using (select @terminal, @day, @shift, @load, @deliveries, @shifts, @capacity) as source(terminal, day, shift, load, deliveries, shifts, capacity) " + 
+                      $"using (select {ToCsv(keyFields, "@")}) as source({ToCsv(keyFields)}) " + 
                       "on target.terminal = source.terminal and target.day = source.day and target.shift = source.shift " + 
-                      "when matched then update set target.load = source.load, target.deliveries = source.deliveries, target.shifts = source.shifts, target.capacity = source.capacity " + 
-                      "when not matched then insert(terminal, day, shift, load, deliveries, shifts, capacity) values (source.terminal, source.day, source.shift, source.load, source.deliveries, source.shifts, source.capacity);";
+                      (nonKeyFields.Any() ? $"when matched then update set {CreateUpdates(nonKeyFields, "target", "source")} " : string.Empty) + 
+                      $"when not matched then insert({ToCsv(keyFields)}) values ({ToCsv(keyFields, "source.")});";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@terminal", dbCapacity.Terminal);
             command.Parameters.AddWithValue("@day", dbCapacity.Day);
             command.Parameters.AddWithValue("@shift", dbCapacity.Shift);
-            command.Parameters.AddWithValue("@load", dbCapacity.Load.HasValue ? (object) dbCapacity.Load.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@deliveries", dbCapacity.Deliveries.HasValue ? (object) dbCapacity.Deliveries.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@shifts", dbCapacity.Shifts.HasValue ? (object) dbCapacity.Shifts.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@capacity", dbCapacity.Capacity.HasValue ? (object) dbCapacity.Capacity.Value : DBNull.Value);
+            if (dbCapacity.Load.HasValue)
+            {
+                command.Parameters.AddWithValue("@load", dbCapacity.Load.Value);
+            }
+            if (dbCapacity.Deliveries.HasValue)
+            {
+                command.Parameters.AddWithValue("@deliveries", dbCapacity.Deliveries.Value);
+            }
+            if (dbCapacity.Shifts.HasValue)
+            {
+                command.Parameters.AddWithValue("@shifts",  dbCapacity.Shifts.Value);
+            }
+
+            if (dbCapacity.Capacity.HasValue)
+            {
+                command.Parameters.AddWithValue("@capacity",  dbCapacity.Capacity.Value);
+            }
             connection.Open();
             command.ExecuteNonQuery();
         }
+
+        private static void IgnoreIfNull(IList nonKeyFields, DbCapacity dbCapacity)
+        {
+            RemoveIfNull(nonKeyFields, dbCapacity.Load, "load");
+            RemoveIfNull(nonKeyFields, dbCapacity.Deliveries, "deliveries");
+            RemoveIfNull(nonKeyFields, dbCapacity.Shifts, "shifts");
+            RemoveIfNull(nonKeyFields, dbCapacity.Capacity, "capacity");
+        }
+
+        private static void RemoveIfNull<T>(IList fields, T? field, string fieldName) where T : struct
+        {
+            if (!field.HasValue)
+            {
+                fields.Remove(fieldName);
+            }
+        }
+
+        private static string CreateUpdates(IEnumerable<string> enumerable, string target, string source)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in enumerable)
+            {
+                sb.Append(target).Append(".").Append(item).Append("=").Append(source).Append(".").Append(item).Append(",");
+            }
+
+            if (sb.Length > 0)
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            return sb.ToString();
+        }
+        
+        private static string ToCsv(IEnumerable<string> enumerable)
+        {
+            return ToCsv(enumerable, string.Empty);
+        }
+        
+        private static string ToCsv(IEnumerable<string> enumerable, string prefix)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in enumerable)
+            {
+                sb.Append(prefix).Append(item).Append(",");
+            }
+
+            if (sb.Length > 0)
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            return sb.ToString();
+        }
+
 
     }
 }
