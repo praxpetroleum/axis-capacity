@@ -83,7 +83,7 @@ namespace AxisCapacity.Data
                       $"from {CapacityTable} c " +
                       $"full outer join {CapacityDateTable} dc " +
                       "on c.Terminal = dc.Terminal and c.Shift = dc.Shift and c.Day = substring(datename(dw, date), 1, 3) " +
-                      $"left outer join {GroupingTable} g on coalesce(c.terminal, dc.terminal) = g.terminal " +
+                      $"inner join {GroupingTable} g on coalesce(c.terminal, dc.terminal) = g.terminal " +
                       "where (dc.Date = @date or c.Day = @day) " +
                       "and coalesce(c.Terminal, dc.Terminal) != @terminal " +
                       "and coalesce(c.shift, dc.shift) = @shift";
