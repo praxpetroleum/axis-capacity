@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration.Attributes;
+﻿using System;
+using CsvHelper.Configuration.Attributes;
 
 namespace AxisCapacity.Web.Model
 {
@@ -11,7 +12,12 @@ namespace AxisCapacity.Web.Model
         public string Shift { get; set; }
 
         [Name("day")]
+        [OptionalAttribute]
         public string Day { get; set; }
+
+        [Name("day")]
+        [OptionalAttribute]
+        public DateTime? Date { get; set; }
 
         [Name("avg_load")]
         [OptionalAttribute]
@@ -35,6 +41,7 @@ namespace AxisCapacity.Web.Model
                    "Terminal='" + Terminal + "'" + 
                    " Shift='" + Shift + "'" + 
                    " Day='" + Day + "'" + 
+                   " Date='" + Date?.ToString("yyyy/MM/dd") + "'" + 
                    " AvgLoad=" + AverageLoad + 
                    " DelsShift=" + DeliveriesPerShift + 
                    " Shifts=" + NumberOfShifts + 
