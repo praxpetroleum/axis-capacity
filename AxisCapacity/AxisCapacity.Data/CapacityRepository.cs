@@ -245,7 +245,12 @@ namespace AxisCapacity.Data
 
         public void InsertDateCapacity(DbCapacity dbCapacity)
         {
-            var sql = $"insert into {CapacityDateTable} (terminal, shift, date, load, deliveries, shifts, capacity) values (@terminal, @shift, @date, @load, @deliveries, @shifts, @capacity)";
+            var keyFields = new List<string> {"terminal", "date", "shift"};
+            var nonKeyFields = new List<string> { "load", "deliveries", "shifts", "capacity" };
+            IgnoreIfNull(nonKeyFields, dbCapacity);
+            keyFields.AddRange(nonKeyFields);
+
+            var sql = $"insert into {CapacityDateTable} ({ToCsv(keyFields)}) values ({ToCsv(keyFields, "@")})";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);

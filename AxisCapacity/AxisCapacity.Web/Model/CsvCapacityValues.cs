@@ -15,7 +15,7 @@ namespace AxisCapacity.Web.Model
         [OptionalAttribute]
         public string Day { get; set; }
 
-        [Name("day")]
+        [Name("date")]
         [OptionalAttribute]
         public DateTime? Date { get; set; }
 
