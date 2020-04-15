@@ -7,10 +7,12 @@ namespace AxisCapacity.Data
     {
         DbCapacity GetCapacity(string terminal, string shift, DateTime date);
         
-        IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime date, int groupId);
+        IEnumerable<DbCapacity> GetGroupCapacities(string terminal, string shift, DateTime date, int groupId);
         
         IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime? date);
 
         void InsertCapacity(DbCapacity dbCapacity);
+
+        void InsertDateCapacity(DbCapacity dbCapacity);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace AxisCapacity.Data
 {
@@ -6,6 +7,7 @@ namespace AxisCapacity.Data
     {
         public string Terminal { get; set; }
         public string Day { get; set; }
+        public DateTime? Date { get; set; }
         public string Shift { get; set; }
         public int? Load { get; set; }
         public decimal? Deliveries { get; set; }
@@ -20,6 +22,7 @@ namespace AxisCapacity.Data
             return "DbCapacity{" + 
                    "Terminal='" + Terminal + "'" + 
                    " Day='" + Day + "'" + 
+                   " Date='" + Date?.ToString("yyyy/MM/dd") + "'" + 
                    " Shift='" + Shift + "'" + 
                    "}";
         }

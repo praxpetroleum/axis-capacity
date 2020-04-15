@@ -29,9 +29,9 @@ namespace AxisCapacity.Web.Controllers
             {
                 queryDate = string.IsNullOrEmpty(date) ? (DateTime?) null : DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
             }
-            catch (FormatException)
+            catch (FormatException e)
             {
-                return BadRequest("Date format must be yyyyMMdd, e.g. 20200321");
+                return BadRequest(e.Message);
             }
 
             if (!string.IsNullOrEmpty(terminal) && !string.IsNullOrEmpty(shift) && queryDate.HasValue)
@@ -49,7 +49,7 @@ namespace AxisCapacity.Web.Controllers
                 }
 
                 var groupMembers = result.GroupId.HasValue
-                    ? _repository.GetCapacities(terminal, shift, queryDate.Value, result.GroupId.Value)
+                    ? _repository.GetGroupCapacities(terminal, shift, queryDate.Value, result.GroupId.Value)
                     : Enumerable.Empty<DbCapacity>();
 
                 var total = capacity.Value;
