@@ -23,7 +23,7 @@ namespace AxisCapacity.Data
             _dbConnectionString = dbConnectionString;
         }
 
-        public DbCapacity GetCapacity(string terminal, string shift, DateTime date)
+        public DbCapacity GetCapacity(Terminal terminal, Shift shift, DateTime date)
         {
             var sql = "select coalesce(c.terminal, dc.terminal)                     as terminal, " +
                       "c.day                                                as day, " +
@@ -44,10 +44,10 @@ namespace AxisCapacity.Data
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var cmd = new SqlCommand(sql, connection);
-            cmd.Parameters.AddWithValue("@terminal", terminal);
+            cmd.Parameters.AddWithValue("@terminal", terminal.Value());
             cmd.Parameters.AddWithValue("@day", date.ToString("ddd"));
             cmd.Parameters.AddWithValue("@date", date.ToString("yyyy/MM/dd"));
-            cmd.Parameters.AddWithValue("@shift", shift);
+            cmd.Parameters.AddWithValue("@shift", shift.Value());
 
             connection.Open();
 
@@ -70,7 +70,7 @@ namespace AxisCapacity.Data
         }
 
 
-        public IEnumerable<DbCapacity> GetGroupCapacities(string terminal, string shift, DateTime date, int groupId)
+        public IEnumerable<DbCapacity> GetGroupCapacities(Terminal terminal, Shift shift, DateTime date, int groupId)
         {
             var sql = "select coalesce(c.terminal, dc.terminal)                     as terminal, " +
                       "c.day                                                as day, " +
@@ -91,10 +91,10 @@ namespace AxisCapacity.Data
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var cmd = new SqlCommand(sql, connection);
-            cmd.Parameters.AddWithValue("@terminal", terminal);
+            cmd.Parameters.AddWithValue("@terminal", terminal.Value());
             cmd.Parameters.AddWithValue("@day", date.ToString("ddd"));
             cmd.Parameters.AddWithValue("@date", date.ToString("yyyy/MM/dd"));
-            cmd.Parameters.AddWithValue("@shift", shift);
+            cmd.Parameters.AddWithValue("@shift", shift.Value());
 
             connection.Open();
 
@@ -117,12 +117,12 @@ namespace AxisCapacity.Data
             }
         }
 
-        public IEnumerable<DbCapacity> GetCapacities(string terminal, string shift, DateTime? date)
+        public IEnumerable<DbCapacity> GetCapacities(Terminal terminal, Shift shift, DateTime? date)
         {
             return date.HasValue ? GetCapacitiesWithDate(terminal, shift, date.Value) : GetCapacitiesWithNoDate(terminal, shift);
         }
 
-        private IEnumerable<DbCapacity> GetCapacitiesWithDate(string terminal, string shift, DateTime date)
+        private IEnumerable<DbCapacity> GetCapacitiesWithDate(Terminal terminal, Shift shift, DateTime date)
         {
             var sql = "select coalesce(c.Terminal, dc.Terminal)                     as terminal, " +  
                               "coalesce(c.Day, substring(datename(dw, date), 1, 3)) as day, " +
@@ -138,12 +138,12 @@ namespace AxisCapacity.Data
 
 
 
-            if (!string.IsNullOrEmpty(terminal))
+            if (terminal != null)
             {
                 sql += $" and coalesce(c.terminal, dc.terminal) = '{terminal}'";
             }
 
-            if (!string.IsNullOrEmpty(shift))
+            if (shift != null)
             {
                 sql += $" and coalesce(c.shift, dc.shift) = '{shift}'";
             }
@@ -168,19 +168,23 @@ namespace AxisCapacity.Data
             }
         }
 
-        private IEnumerable<DbCapacity> GetCapacitiesWithNoDate(string terminal, string shift)
+        private IEnumerable<DbCapacity> GetCapacitiesWithNoDate(Terminal terminal, Shift shift)
         {
-            var sql = $"select terminal, day, shift, load, deliveries, shifts, capacity, date from (select terminal, shift, day, null as date, load, deliveries, shifts, capacity from {CapacityTable} union select terminal, shift, substring(datename(dw,date), 1, 3) day, date, load, deliveries, shifts, capacity from {CapacityDateTable}) as capacity_union where 1=1";
+            var sql = "select terminal, day, shift, load, deliveries, shifts, capacity, date from " +
+                      $"(select terminal, shift, day, null as date, load, deliveries, shifts, capacity from {CapacityTable} " +
+                      "union " +
+                      $"select terminal, shift, substring(datename(dw,date), 1, 3) day, date, load, deliveries, shifts, capacity from {CapacityDateTable}) as capacity_union " +
+                      "where 1=1";
 
 
-            if (!string.IsNullOrEmpty(terminal))
+            if (terminal != null)
             {
-                sql += $" and lower(terminal) = '{terminal}'";
+                sql += $" and terminal = '{terminal.Value()}'";
             }
 
-            if (!string.IsNullOrEmpty(shift))
+            if (shift != null)
             {
-                sql += $" and lower(shift) = '{shift}'";
+                sql += $" and shift = '{shift.Value()}'";
             }
 
             using var connection = new SqlConnection(_dbConnectionString);
