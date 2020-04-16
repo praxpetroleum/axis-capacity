@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AxisCapacity.Common;
 using Microsoft.Data.SqlClient;
 
 namespace AxisCapacity.Data
@@ -212,10 +213,10 @@ namespace AxisCapacity.Data
 
 
             var sql = $"merge into {CapacityTable} as target " + 
-                      $"using (select {ToCsv(keyFields, "@")}) as source({ToCsv(keyFields)}) " + 
+                      $"using (select {Utils.ToCsv(keyFields, "@")}) as source({Utils.ToCsv(keyFields)}) " + 
                       "on target.terminal = source.terminal and target.day = source.day and target.shift = source.shift " + 
                       (nonKeyFields.Any() ? $"when matched then update set {CreateUpdates(nonKeyFields, "target", "source")} " : string.Empty) + 
-                      $"when not matched then insert({ToCsv(keyFields)}) values ({ToCsv(keyFields, "source.")});";
+                      $"when not matched then insert({Utils.ToCsv(keyFields)}) values ({Utils.ToCsv(keyFields, "source.")});";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);
@@ -250,7 +251,7 @@ namespace AxisCapacity.Data
             IgnoreIfNull(nonKeyFields, dbCapacity);
             keyFields.AddRange(nonKeyFields);
 
-            var sql = $"insert into {CapacityDateTable} ({ToCsv(keyFields)}) values ({ToCsv(keyFields, "@")})";
+            var sql = $"insert into {CapacityDateTable} ({Utils.ToCsv(keyFields)}) values ({Utils.ToCsv(keyFields, "@")})";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);
@@ -310,28 +311,5 @@ namespace AxisCapacity.Data
 
             return sb.ToString();
         }
-        
-        private static string ToCsv(IEnumerable<string> enumerable)
-        {
-            return ToCsv(enumerable, string.Empty);
-        }
-        
-        private static string ToCsv(IEnumerable<string> enumerable, string prefix)
-        {
-            var sb = new StringBuilder();
-            foreach (var item in enumerable)
-            {
-                sb.Append(prefix).Append(item).Append(",");
-            }
-
-            if (sb.Length > 0)
-            {
-                sb.Remove(sb.Length - 1, 1);
-            }
-
-            return sb.ToString();
-        }
-
-
     }
 }
