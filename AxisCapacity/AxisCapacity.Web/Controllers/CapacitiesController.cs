@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using AxisCapacity.Common;
 using AxisCapacity.Data;
 using AxisCapacity.Engine;
@@ -22,21 +23,29 @@ namespace AxisCapacity.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery] string terminal, [FromQuery] string shift, [FromQuery] string date)
+        public IActionResult Get([FromQuery] string terminal, [FromQuery] string shift, [FromQuery] string date, [FromQuery] string view)
         {
             try
             {
-                var queryDate = string.IsNullOrEmpty(date)
-                    ? (DateTime?) null
-                    : DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
+                var queryDate = string.IsNullOrEmpty(date) ? (DateTime?) null : DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
                 var queryShift = string.IsNullOrEmpty(shift) ? null : Shift.From(shift);
+                var queryView = string.IsNullOrEmpty(view) ? null : View.From(view);
 
                 if (queryDate.HasValue && !string.IsNullOrEmpty(terminal) && queryShift != null)
                 {
+                    if (view != null)
+                    {
+                        return BadRequest("Parameter view not allowed when shift is set");
+                    }
                     return HandleExactQuery(terminal, queryShift, queryDate.Value);
                 }
+                
+                if (queryDate.HasValue && !string.IsNullOrEmpty(terminal) && queryView != null)
+                {
+                    return HandleViewQuery(terminal, queryView, queryDate.Value);
+                }
 
-                return BadRequest("Terminal, shift and date are required fields.");
+                return BadRequest("Terminal, shift, date or view are required fields.");
             }
             catch (FormatException e)
             {
@@ -70,5 +79,36 @@ namespace AxisCapacity.Web.Controllers
 
             return Ok(result);
         }
+
+        private IActionResult HandleViewQuery(string terminal, View view, DateTime dateTime)
+        {
+            if (view.IsMonth())
+            {
+                return HandleMonth(terminal, dateTime);
+            }
+
+            throw new ArgumentException("Only month view is currently supported");
+        }
+
+        
+        private IActionResult HandleMonth(string terminal, in DateTime date)
+        {
+            var weekCapacity = _repository.GetCapacities(terminal, null, null);
+            if (weekCapacity == null)
+            {
+                return NotFound($"Did not find corresponding depot capacity entry for terminal '{terminal}'.");
+            }
+
+            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+            var lastDayOfMonth = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+
+            var monthCapacity = _repository.GetDateCapacities(terminal, null, firstDayOfMonth, lastDayOfMonth);
+
+            var finalResult = weekCapacity.Concat(monthCapacity);
+
+            return Ok(finalResult);
+        }
+
+
     }
 }

@@ -46,6 +46,11 @@ namespace AxisCapacity.Common
             return Value();
         }
 
+        public bool IsMonth()
+        {
+            return _view == ViewEnum.Month;
+        }
+
         public static View From(string viewName)
         {
             StringToView.TryGetValue(viewName.ToLower(), out var outValue);

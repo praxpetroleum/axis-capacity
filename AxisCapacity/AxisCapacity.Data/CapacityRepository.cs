@@ -96,6 +96,103 @@ namespace AxisCapacity.Data
                 : null;
         }
 
+        public IEnumerable<DbCapacity> GetCapacities(string terminal, Shift shift, DateTime? date)
+        {
+            var sql = "select " +
+                      "d.name                              as  depot, " +
+                      "dc.day                              as  day,  " +
+                      "dc.shift                            as  shift, " +
+                      "dc.load                             as  load, " +
+                      "dc.deliveries                       as  deliveries, " +
+                      "dc.shifts                           as  shifts, " +
+                      "dc.capacity                         as  capacity " +
+                      $"from {TerminalTable} t inner join {DepotTable} d on t.depot_id=d.id inner join {CapacityTable} dc on dc.depot_id=d.id where 1=1";
+
+            if (!string.IsNullOrEmpty(terminal))
+            {
+                sql += $" and t.name = '{terminal}'";
+            }
+
+            if (shift != null)
+            {
+                sql += $" and dc.shift = '{shift.Value()}'";
+            }
+
+            if (date.HasValue)
+            {
+                sql += $" and dc.Day = '{date.Value:ddd}'";
+            }
+
+            using var connection = new SqlConnection(_dbConnectionString);
+            using var cmd = new SqlCommand(sql, connection);
+            connection.Open();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return new DbCapacity
+                {
+                    Depot = (string) reader[0],
+                    Day = reader[1] == DBNull.Value ? null : (string) reader[1],
+                    Shift = (string) reader[2],
+                    Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
+                    Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
+                    Shifts = reader[5] == DBNull.Value ? null : (int?) reader[5],
+                    Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
+                };
+            }
+        }
+
+        public IEnumerable<DbCapacity> GetDateCapacities(string terminal, Shift shift, DateTime? start, DateTime? end)
+        {
+            var sql = "select " +
+                      "d.name                              as  depot, " +
+                      "dc.date                             as  date,  " +
+                      "dc.shift                            as  shift, " +
+                      "dc.load                             as  load, " +
+                      "dc.deliveries                       as  deliveries, " +
+                      "dc.shifts                           as  shifts, " +
+                      "dc.capacity                         as  capacity " +
+                      $"from {TerminalTable} t inner join {DepotTable} d on t.depot_id=d.id inner join {CapacityDateTable} dc on dc.depot_id=d.id";
+
+            if (!string.IsNullOrEmpty(terminal))
+            {
+                sql += $" and t.name = '{terminal}'";
+            }
+
+            if (shift != null)
+            {
+                sql += $" and dc.shift = '{shift.Value()}'";
+            }
+
+            if (start.HasValue)
+            {
+                sql += $" and dc.date >= '{start.Value:yyyyMMdd}'";
+            }
+
+            if (end.HasValue)
+            {
+                sql += $" and dc.date <= '{end.Value:yyyyMMdd}'";
+            }
+
+            using var connection = new SqlConnection(_dbConnectionString);
+            using var cmd = new SqlCommand(sql, connection);
+            connection.Open();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return new DbCapacity
+                {
+                    Depot = (string) reader[0],
+                    Date = reader[1] == DBNull.Value ? null : (DateTime?) reader[1],
+                    Shift = (string) reader[2],
+                    Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
+                    Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
+                    Shifts = reader[5] == DBNull.Value ? null : (int?) reader[5],
+                    Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
+                };
+            }
+        }
+
         public void InsertCapacity(DbCapacity dbCapacity)
         {
             var special = new[] {$"(select id from {DepotTable} where name = @depot)", "depot_id"};
