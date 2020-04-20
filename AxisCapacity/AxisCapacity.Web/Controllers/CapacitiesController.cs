@@ -33,10 +33,6 @@ namespace AxisCapacity.Web.Controllers
 
                 if (queryDate.HasValue && !string.IsNullOrEmpty(terminal) && queryShift != null)
                 {
-                    if (view != null)
-                    {
-                        return BadRequest("Parameter view not allowed when shift is set");
-                    }
                     return HandleExactQuery(terminal, queryShift, queryDate.Value);
                 }
                 
@@ -45,7 +41,7 @@ namespace AxisCapacity.Web.Controllers
                     return HandleViewQuery(terminal, queryView, queryDate.Value);
                 }
 
-                return BadRequest("Terminal, shift, date or view are required fields.");
+                return BadRequest("Terminal, shift, date are required fields.");
             }
             catch (FormatException e)
             {
@@ -87,7 +83,7 @@ namespace AxisCapacity.Web.Controllers
                 return HandleMonth(terminal, dateTime);
             }
 
-            throw new ArgumentException("Only month view is currently supported");
+            return BadRequest("Only a view of month is currently supported.");
         }
 
         
