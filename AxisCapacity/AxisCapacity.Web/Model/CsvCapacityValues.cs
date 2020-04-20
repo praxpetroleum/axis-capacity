@@ -5,8 +5,8 @@ namespace AxisCapacity.Web.Model
 {
     public class CsvCapacityValues
     {
-        [Name("terminal")]
-        public string Terminal { get; set; }
+        [Name("depot")]
+        public string Depot { get; set; }
 
         [Name("shift")]
         public string Shift { get; set; }
@@ -38,7 +38,7 @@ namespace AxisCapacity.Web.Model
         public override string ToString()
         {
             return "CsvCapacityValues{" + 
-                   "Terminal='" + Terminal + "'" + 
+                   "Depot='" + Depot + "'" + 
                    " Shift='" + Shift + "'" + 
                    " Day='" + Day + "'" + 
                    " Date='" + Date?.ToString("yyyy/MM/dd") + "'" + 

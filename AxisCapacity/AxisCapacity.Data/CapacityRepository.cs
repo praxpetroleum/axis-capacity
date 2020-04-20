@@ -25,7 +25,7 @@ namespace AxisCapacity.Data
         public DbCapacity GetCapacity(string terminal, Shift shift, DateTime date)
         {
             var sql = "select " +
-                      "t.name                              as  terminal, " +
+                      "d.name                              as  depot, " +
                       "dc.day                              as  day,  " +
                       "dc.shift                            as  shift, " +
                       "dc.load                             as  load, " +
@@ -48,7 +48,7 @@ namespace AxisCapacity.Data
             return reader.Read()
                 ? new DbCapacity
                 {
-                    Terminal = (string) reader[0],
+                    Depot = (string) reader[0],
                     Day = reader[1] == DBNull.Value ? null : (string) reader[1],
                     Shift = (string) reader[2],
                     Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
@@ -62,7 +62,7 @@ namespace AxisCapacity.Data
         public DbCapacity GetDateCapacity(string terminal, Shift shift, DateTime date)
         {
             var sql = "select " +
-                      "t.name                              as  terminal, " +
+                      "d.name                              as  depot, " +
                       "dc.date                             as  date,  " +
                       "dc.shift                            as  shift, " +
                       "dc.load                             as  load, " +
@@ -85,7 +85,7 @@ namespace AxisCapacity.Data
             return reader.Read()
                 ? new DbCapacity
                 {
-                    Terminal = (string) reader[0],
+                    Depot = (string) reader[0],
                     Date = reader[1] == DBNull.Value ? null : (DateTime?) reader[1],
                     Shift = (string) reader[2],
                     Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
@@ -98,21 +98,22 @@ namespace AxisCapacity.Data
 
         public void InsertCapacity(DbCapacity dbCapacity)
         {
-            var keyFields = new List<string> {"terminal", "day", "shift"};
+            var special = new[] {$"(select id from {DepotTable} where name = @depot)", "depot_id"};
+            var keyFieldsMinusSpecial = new List<string> {"day", "shift"};
             var nonKeyFields = new List<string> { "load", "deliveries", "shifts", "capacity" };
+            var allFields = keyFieldsMinusSpecial;
             IgnoreIfNull(nonKeyFields, dbCapacity);
-            keyFields.AddRange(nonKeyFields);
-
+            allFields.AddRange(nonKeyFields);
 
             var sql = $"merge into {CapacityTable} as target " + 
-                      $"using (select {Utils.ToCsv(keyFields, "@")}) as source({Utils.ToCsv(keyFields)}) " + 
-                      "on target.terminal = source.terminal and target.day = source.day and target.shift = source.shift " + 
+                      $"using (select {special[0]},{Utils.ToCsv(allFields, "@")}) as source({special[1]},{Utils.ToCsv(allFields)}) " + 
+                      "on target.depot_id = source.depot_id and target.day = source.day and target.shift = source.shift " + 
                       (nonKeyFields.Any() ? $"when matched then update set {CreateUpdates(nonKeyFields, "target", "source")} " : string.Empty) + 
-                      $"when not matched then insert({Utils.ToCsv(keyFields)}) values ({Utils.ToCsv(keyFields, "source.")});";
+                      $"when not matched then insert({special[1]},{Utils.ToCsv(allFields)}) values ({special[0]},{Utils.ToCsv(allFields, "source.")});";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@terminal", dbCapacity.Terminal);
+            command.Parameters.AddWithValue("@depot", dbCapacity.Depot);
             command.Parameters.AddWithValue("@day", dbCapacity.Day);
             command.Parameters.AddWithValue("@shift", dbCapacity.Shift);
             if (dbCapacity.Load.HasValue)
@@ -138,16 +139,18 @@ namespace AxisCapacity.Data
 
         public void InsertDateCapacity(DbCapacity dbCapacity)
         {
-            var keyFields = new List<string> {"terminal", "date", "shift"};
+            var special = new[] {$"(select id from {DepotTable} where name = @depot)", "depot_id"};
+            var keyFieldsMinusSpecial = new List<string> {"date", "shift"};
             var nonKeyFields = new List<string> { "load", "deliveries", "shifts", "capacity" };
+            var allFields = keyFieldsMinusSpecial;
             IgnoreIfNull(nonKeyFields, dbCapacity);
-            keyFields.AddRange(nonKeyFields);
+            allFields.AddRange(nonKeyFields);
 
-            var sql = $"insert into {CapacityDateTable} ({Utils.ToCsv(keyFields)}) values ({Utils.ToCsv(keyFields, "@")})";
+            var sql = $"insert into {CapacityDateTable} ({special[1]},{Utils.ToCsv(allFields)}) values ({special[0]},{Utils.ToCsv(allFields, "@")})";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var command = new SqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@terminal", dbCapacity.Terminal);
+            command.Parameters.AddWithValue("@depot", dbCapacity.Depot);
             command.Parameters.AddWithValue("@shift", dbCapacity.Shift);
             command.Parameters.AddWithValue("@date", dbCapacity.Date);
             if (dbCapacity.Load.HasValue)

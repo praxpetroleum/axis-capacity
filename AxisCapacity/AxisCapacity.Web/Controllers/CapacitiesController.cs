@@ -62,13 +62,13 @@ namespace AxisCapacity.Web.Controllers
                 result = overrideResult;
             }
 
-            var capacity = result.Capacity ?? _engine.CalculateCapacity(result.Load, result.Deliveries, result.Shifts);
-            if (!capacity.HasValue)
+            result.Capacity ??= _engine.CalculateCapacity(result.Load, result.Deliveries, result.Shifts);
+            if (!result.Capacity.HasValue)
             {
                 return BadRequest("Could not calculate capacity for terminal '{terminal}', shift '{shift.Value()}, date '{date:yyyy/MM/dd}'. Missing depot entry parameter values?");
             }
 
-            return Ok(new {capacity = capacity.Value});
+            return Ok(result);
         }
     }
 }

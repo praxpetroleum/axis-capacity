@@ -5,7 +5,7 @@ namespace AxisCapacity.Data
 {
     public class DbCapacity
     {
-        public string Terminal { get; set; }
+        public string Depot { get; set; }
         public string Day { get; set; }
         public DateTime? Date { get; set; }
         public string Shift { get; set; }
@@ -20,7 +20,7 @@ namespace AxisCapacity.Data
         public override string ToString()
         {
             return "DbCapacity{" + 
-                   "Terminal='" + Terminal + "'" + 
+                   "Depot='" + Depot + "'" + 
                    " Day='" + Day + "'" + 
                    " Date='" + Date?.ToString("yyyy/MM/dd") + "'" + 
                    " Shift='" + Shift + "'" + 
