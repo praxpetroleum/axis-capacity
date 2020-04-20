@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using AxisCapacity.Common;
 using AxisCapacity.Data;
 using AxisCapacity.Engine;
@@ -30,15 +29,14 @@ namespace AxisCapacity.Web.Controllers
                 var queryDate = string.IsNullOrEmpty(date)
                     ? (DateTime?) null
                     : DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture);
-                var queryTerminal = string.IsNullOrEmpty(terminal) ? null : Terminal.From(terminal);
                 var queryShift = string.IsNullOrEmpty(shift) ? null : Shift.From(shift);
 
-                if (queryDate.HasValue && queryTerminal != null && queryShift != null)
+                if (queryDate.HasValue && !string.IsNullOrEmpty(terminal) && queryShift != null)
                 {
-                    return HandleExactQuery(queryTerminal, queryShift, queryDate.Value);
+                    return HandleExactQuery(terminal, queryShift, queryDate.Value);
                 }
 
-                return HandlePartialQuery(queryTerminal, queryShift, queryDate);
+                return BadRequest("Terminal, shift and date are required fields.");
             }
             catch (FormatException e)
             {
@@ -50,51 +48,27 @@ namespace AxisCapacity.Web.Controllers
             }
         }
 
-        private IActionResult HandlePartialQuery(Terminal terminal, Shift shift, DateTime? date)
-        {
-            var capacities = _repository.GetCapacities(terminal, shift, date).ToList();
-            foreach (var capacity in capacities)
-            {
-                if (!capacity.Capacity.HasValue)
-                {
-                    capacity.Capacity = _engine.CalculateCapacity(capacity.Load, capacity.Deliveries, capacity.Shifts);
-                }
-            }
-
-            return Ok(capacities);
-        }
-
-        private IActionResult HandleExactQuery(Terminal terminal, Shift shift, DateTime date)
+        private IActionResult HandleExactQuery(string terminal, Shift shift, DateTime date)
         {
             var result = _repository.GetCapacity(terminal, shift, date);
             if (result == null)
             {
-                return NotFound();
+                return NotFound($"Did not find corresponding depot capacity entry for terminal '{terminal}', shift '{shift.Value()}, date '{date:yyyy/MM/dd}'");
+            }
+
+            var overrideResult = _repository.GetDateCapacity(terminal, shift, date);
+            if (overrideResult != null)
+            {
+                result = overrideResult;
             }
 
             var capacity = result.Capacity ?? _engine.CalculateCapacity(result.Load, result.Deliveries, result.Shifts);
             if (!capacity.HasValue)
             {
-                return BadRequest("Could not calculate capacity due to missing parameters");
+                return BadRequest("Could not calculate capacity for terminal '{terminal}', shift '{shift.Value()}, date '{date:yyyy/MM/dd}'. Missing depot entry parameter values?");
             }
 
-            var groupMembers = result.GroupId.HasValue
-                ? _repository.GetGroupCapacities(terminal, shift, date, result.GroupId.Value)
-                : Enumerable.Empty<DbCapacity>();
-
-            var total = capacity.Value;
-            foreach (var groupMember in groupMembers)
-            {
-                var memberCapacity = groupMember.Capacity ?? _engine.CalculateCapacity(groupMember.Load, groupMember.Deliveries, groupMember.Shifts);
-                if (!memberCapacity.HasValue)
-                {
-                    return BadRequest($"Could not calculate capacity due to missing parameters for {groupMember}");
-                }
-
-                total += memberCapacity.Value;
-            }
-
-            return Ok(new {capacity = total});
+            return Ok(new {capacity = capacity.Value});
         }
     }
 }

@@ -10,11 +10,10 @@ namespace AxisCapacity.Data
 {
     public class CapacityRepository : ICapacityRepository
     {
-        private const string CapacityTable = "dbo.Capacities";
-        
-        private const string CapacityDateTable = "dbo.DateCapacities";
-
-        private const string GroupingTable = "dbo.TerminalGroups";
+        private const string CapacityTable = "dbo.DepotCapacities";
+        private const string CapacityDateTable = "dbo.DepotDateCapacities";
+        private const string DepotTable = "dbo.Depot";  
+        private const string TerminalTable = "dbo.Terminals";
 
         private readonly string _dbConnectionString;
 
@@ -23,30 +22,23 @@ namespace AxisCapacity.Data
             _dbConnectionString = dbConnectionString;
         }
 
-        public DbCapacity GetCapacity(Terminal terminal, Shift shift, DateTime date)
+        public DbCapacity GetCapacity(string terminal, Shift shift, DateTime date)
         {
-            var sql = "select coalesce(c.terminal, dc.terminal)                     as terminal, " +
-                      "c.day                                                as day, " +
-                      "coalesce(c.shift, dc.shift)                          as shift, " +
-                      "coalesce(dc.load, c.Load)                            as load, " +
-                      "coalesce(dc.deliveries, c.deliveries)                as deliveries, " +
-                      "coalesce(dc.shifts, c.shifts)                        as shifts, " +
-                      "coalesce(dc.capacity, c.capacity)                    as capacity, " +
-                      "dc.date                                              as date, " +
-                      "g.group_id                                           as group_id " +
-                      $"from {CapacityTable} c " +
-                      $"full outer join {CapacityDateTable} dc " +
-                      "on c.Terminal = dc.Terminal and c.Shift = dc.Shift and c.Day = substring(datename(dw, dc.date), 1, 3) " +
-                      $"left outer join {GroupingTable} g on coalesce(c.terminal, dc.terminal) = g.terminal " +
-                      "where (dc.Date = @date or c.Day = @day) " +
-                      "and coalesce(c.Terminal, dc.Terminal) = @terminal " +
-                      "and coalesce(c.shift, dc.shift) = @shift";
+            var sql = "select " +
+                      "t.name                              as  terminal, " +
+                      "dc.day                              as  day,  " +
+                      "dc.shift                            as  shift, " +
+                      "dc.load                             as  load, " +
+                      "dc.deliveries                       as  deliveries, " +
+                      "dc.shifts                           as  shifts, " +
+                      "dc.capacity                         as  capacity " + 
+                      $"from {TerminalTable} t inner join {DepotTable} d on t.depot_id=d.id inner join {CapacityTable} dc on dc.depot_id=d.id " + 
+                      "where t.name = @terminal and dc.shift = @shift and dc.day = @day";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var cmd = new SqlCommand(sql, connection);
-            cmd.Parameters.AddWithValue("@terminal", terminal.Value());
+            cmd.Parameters.AddWithValue("@terminal", terminal);
             cmd.Parameters.AddWithValue("@day", date.ToString("ddd"));
-            cmd.Parameters.AddWithValue("@date", date.ToString("yyyy/MM/dd"));
             cmd.Parameters.AddWithValue("@shift", shift.Value());
 
             connection.Open();
@@ -61,151 +53,47 @@ namespace AxisCapacity.Data
                     Shift = (string) reader[2],
                     Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
                     Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
-                    Shifts = reader[5] == DBNull.Value ? null : (byte?) reader[5],
+                    Shifts = reader[5] == DBNull.Value ? null : (int?) reader[5],
                     Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
-                    Date = reader[7] == DBNull.Value ? null : (DateTime?) reader[7],
-                    GroupId = reader[8] == DBNull.Value ? null : (byte?) reader[8]
                 }
                 : null;
         }
 
-
-        public IEnumerable<DbCapacity> GetGroupCapacities(Terminal terminal, Shift shift, DateTime date, int groupId)
+        public DbCapacity GetDateCapacity(string terminal, Shift shift, DateTime date)
         {
-            var sql = "select coalesce(c.terminal, dc.terminal)                     as terminal, " +
-                      "c.day                                                as day, " +
-                      "coalesce(c.shift, dc.shift)                          as shift, " +
-                      "coalesce(dc.load, c.Load)                            as load, " +
-                      "coalesce(dc.deliveries, c.deliveries)                as deliveries, " +
-                      "coalesce(dc.shifts, c.shifts)                        as shifts, " +
-                      "coalesce(dc.capacity, c.capacity)                    as capacity, " +
-                      "dc.date                                              as date, " +
-                      "g.group_id                                           as group_id " +
-                      $"from {CapacityTable} c " +
-                      $"full outer join {CapacityDateTable} dc " +
-                      "on c.Terminal = dc.Terminal and c.Shift = dc.Shift and c.Day = substring(datename(dw, date), 1, 3) " +
-                      $"inner join {GroupingTable} g on coalesce(c.terminal, dc.terminal) = g.terminal " +
-                      "where (dc.Date = @date or c.Day = @day) " +
-                      "and coalesce(c.Terminal, dc.Terminal) != @terminal " +
-                      "and coalesce(c.shift, dc.shift) = @shift";
+            var sql = "select " +
+                      "t.name                              as  terminal, " +
+                      "dc.date                             as  date,  " +
+                      "dc.shift                            as  shift, " +
+                      "dc.load                             as  load, " +
+                      "dc.deliveries                       as  deliveries, " +
+                      "dc.shifts                           as  shifts, " +
+                      "dc.capacity                         as  capacity " + 
+                      $"from {TerminalTable} t inner join {DepotTable} d on t.depot_id=d.id inner join {CapacityDateTable} dc on dc.depot_id=d.id " + 
+                      "where t.name = @terminal and dc.shift = @shift and dc.date = @date";
 
             using var connection = new SqlConnection(_dbConnectionString);
             using var cmd = new SqlCommand(sql, connection);
-            cmd.Parameters.AddWithValue("@terminal", terminal.Value());
-            cmd.Parameters.AddWithValue("@day", date.ToString("ddd"));
-            cmd.Parameters.AddWithValue("@date", date.ToString("yyyy/MM/dd"));
+            cmd.Parameters.AddWithValue("@terminal", terminal);
             cmd.Parameters.AddWithValue("@shift", shift.Value());
+            cmd.Parameters.AddWithValue("@date", date.ToString("yyyy/MM/dd"));
 
             connection.Open();
 
             using var reader = cmd.ExecuteReader();
 
-            while (reader.Read())
-            {
-                yield return new DbCapacity
+            return reader.Read()
+                ? new DbCapacity
                 {
                     Terminal = (string) reader[0],
-                    Day = reader[1] == DBNull.Value ? null : (string) reader[1],
+                    Date = reader[1] == DBNull.Value ? null : (DateTime?) reader[1],
                     Shift = (string) reader[2],
                     Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
                     Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
-                    Shifts = reader[5] == DBNull.Value ? null : (byte?) reader[5],
-                    Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6],
-                    Date = reader[7] == DBNull.Value ? null : (DateTime?) reader[7],
-                    GroupId = reader[8] == DBNull.Value ? null : (byte?) reader[8]
-                };
-            }
-        }
-
-        public IEnumerable<DbCapacity> GetCapacities(Terminal terminal, Shift shift, DateTime? date)
-        {
-            return date.HasValue ? GetCapacitiesWithDate(terminal, shift, date.Value) : GetCapacitiesWithNoDate(terminal, shift);
-        }
-
-        private IEnumerable<DbCapacity> GetCapacitiesWithDate(Terminal terminal, Shift shift, DateTime date)
-        {
-            var sql = "select coalesce(c.Terminal, dc.Terminal)                     as terminal, " +  
-                              "coalesce(c.Day, substring(datename(dw, date), 1, 3)) as day, " +
-                              "coalesce(c.shift, dc.Shift)                          as shift, " + 
-                              "coalesce(dc.load, c.Load)                            as load, " + 
-                              "coalesce(dc.deliveries, c.deliveries)                as deliveries, " + 
-                              "coalesce(dc.shifts, c.shifts)                        as shifts, " + 
-                              "coalesce(dc.capacity, c.capacity)                    as capacity " + 
-                              $"from {CapacityTable} c " + 
-                              $"full outer join {CapacityDateTable} dc " +
-                              "on c.Terminal = dc.Terminal and c.Shift = dc.Shift and c.Day = substring(datename(dw, date), 1, 3)" +
-                              $"where (dc.Date = '{date:yyyy/MM/dd}' or c.Day='{date:ddd}')"; 
-
-
-
-            if (terminal != null)
-            {
-                sql += $" and coalesce(c.terminal, dc.terminal) = '{terminal}'";
-            }
-
-            if (shift != null)
-            {
-                sql += $" and coalesce(c.shift, dc.shift) = '{shift}'";
-            }
-
-            using var connection = new SqlConnection(_dbConnectionString);
-            using var cmd = new SqlCommand(sql, connection);
-            connection.Open();
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                yield return new DbCapacity
-                {
-                    Terminal = (string) reader[0],
-                    Day = (string) reader[1],
-                    Shift = (string) reader[2],
-                    Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
-                    Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
-                    Shifts = reader[5] == DBNull.Value ? null : (byte?) reader[5],
+                    Shifts = reader[5] == DBNull.Value ? null : (int?) reader[5],
                     Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
-                };
-            }
-        }
-
-        private IEnumerable<DbCapacity> GetCapacitiesWithNoDate(Terminal terminal, Shift shift)
-        {
-            var sql = "select terminal, day, shift, load, deliveries, shifts, capacity, date from " +
-                      $"(select terminal, shift, day, null as date, load, deliveries, shifts, capacity from {CapacityTable} " +
-                      "union " +
-                      $"select terminal, shift, substring(datename(dw,date), 1, 3) day, date, load, deliveries, shifts, capacity from {CapacityDateTable}) as capacity_union " +
-                      "where 1=1";
-
-
-            if (terminal != null)
-            {
-                sql += $" and terminal = '{terminal.Value()}'";
-            }
-
-            if (shift != null)
-            {
-                sql += $" and shift = '{shift.Value()}'";
-            }
-
-            using var connection = new SqlConnection(_dbConnectionString);
-            using var cmd = new SqlCommand(sql, connection);
-            connection.Open();
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                yield return new DbCapacity
-                {
-                    Terminal = (string) reader[0],
-                    Day = (string) reader[1],
-                    Shift = (string) reader[2],
-                    Load = reader[3] == DBNull.Value ? null : (int?) reader[3],
-                    Deliveries = reader[4] == DBNull.Value ? null : (decimal?) reader[4],
-                    Shifts = reader[5] == DBNull.Value ? null : (byte?) reader[5],
-                    Capacity = reader[6] == DBNull.Value ? null : (decimal?) reader[6], 
-                    Date = reader[7] == DBNull.Value ? null : (DateTime?) reader[7], 
-                };
-            }
+                }
+                : null;
         }
 
         public void InsertCapacity(DbCapacity dbCapacity)
