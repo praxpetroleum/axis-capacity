@@ -44,7 +44,7 @@ namespace AxisCapacity.Web.Controllers
                     {
                         Validate(value);
                         var capacity = new DbCapacity();
-                        capacity.Terminal = value.Terminal;
+                        capacity.Depot = value.Depot;
                         capacity.Day = value.Day;
                         capacity.Date = value.Date;
                         capacity.Shift = value.Shift;
@@ -71,21 +71,18 @@ namespace AxisCapacity.Web.Controllers
             {
                 return Ok("An error ocurred: " + e.Message);
             }
-            
-
-            
         }
 
         private void Validate(CsvCapacityValues value)
         {
             if (string.IsNullOrEmpty(value.Day) && !value.Date.HasValue)
             {
-                throw new ArgumentException("One of {date, day} is required: " + value);
+                throw new ArgumentException("One of 'date', 'day' is required: " + value);
             }
 
             if (!string.IsNullOrEmpty(value.Day) && value.Date.HasValue)
             {
-                throw new ArgumentException("Only one of {date, day} must be specified: " + value);
+                throw new ArgumentException("Only one of 'date', 'day' must be specified: " + value);
             }
         }
 
