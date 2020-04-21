@@ -1,12 +1,13 @@
 -- DDL
 
--- Droping tables that aren't used any longer
+-- Drop old tables
 drop table dbo.Capacities;
 go
 drop table dbo.DateCapacities;
 go
 
--- Creating new table structures
+
+-- Create new tables
 create table dbo.Depot(
     id int identity(1,1),
     name varchar(256) not null,
