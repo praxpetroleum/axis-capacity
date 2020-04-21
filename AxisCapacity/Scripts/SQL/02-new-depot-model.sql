@@ -1,3 +1,28 @@
+/*
+##########################################################################<br>
+-- Name:                dev-212-add-date-capacities.sql
+-- Date:                (21/04/2020) 
+-- Author:              Evans Thereska (evans.thereska@prax.com )
+-- Company:             Prax Petroleum Ltd
+-- Purpose:             Capacities now belong to a Depot which can have service multiple Terminals.
+                        Also added ability to query capacities by month.
+-- Ticket ID:           https://praxpetroleum.atlassian.net/browse/DEV-212
+-- Servers/DB’s:        SOWEYDB02/Axis
+-- Usage:               
+-- Impact:              Operations teams can now upload capacities based on Depot
+-- Required grants:     
+-- Called by:           Run once by DBA 
+-- NOTE:                
+
+##########################################################################<br>
+-- ver:                                  user    date        change
+-- 1.0	                         evans.thereska	20200421	initial   
+##########################################################################<br>
+*/
+
+use Axis;
+go
+
 -- DDL
 
 -- Drop old tables
